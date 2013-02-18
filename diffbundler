@@ -17,8 +17,8 @@ limitations under the License.
 
 import os, shutil, subprocess, tarfile, tempfile
 
-REFSHEADS = os.path.join('refs', 'heads')
-REFSTAGS = os.path.join('refs', 'tags')
+REFS_HEADS = os.path.join('refs', 'heads')
+REFS_TAGS = os.path.join('refs', 'tags')
 
 def cleanup_path(path):
     if not os.path.exists(path):
@@ -208,11 +208,11 @@ class DiffBundler(object):
             for ref in git_stdout(repo_dir, 'show-ref', '--head'):
                 sha, name = ref.split(' ')
 
-                if name.startswith(REFSHEADS):
-                    name = name[len(REFSHEADS)+1:]
+                if name.startswith(REFS_HEADS):
+                    name = name[len(REFS_HEADS)+1:]
                     headsf.write(sha+' '+name+'\n')
-                elif name.startswith(REFSTAGS):
-                    name = name[len(REFSTAGS)+1:]
+                elif name.startswith(REFS_TAGS):
+                    name = name[len(REFS_TAGS)+1:]
                     tagsf.write(sha+' '+name+'\n')
 
                 m = -1
