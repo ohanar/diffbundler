@@ -189,6 +189,15 @@ class DiffBundler(object):
             bundle.extract_refs(extract_dir)
 
     def create_diffbundle(self, repo_dir):
+        # check to see if there are actually any commits
+        r = git_retcode(repo_dir, 'show-ref', '--head')
+        if r == 128:
+            raise ValueError(
+                    "'%s' does not contain a git repository."%repo_dir)
+        elif r == 1:
+            # no commits in the git repository, no need to
+            # bundle anything
+            return
         with SelfCleaningTempDir() as tmpd:
             self._extract_refs(tmpd)
 
