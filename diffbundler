@@ -203,10 +203,10 @@ class DiffBundler(object):
 
             old_shas = get_shas(tmpd)
 
+            head_sha = git_stdout(repo_dir, 'rev-parse', 'HEAD')
+            head_name = git_stdout(repo_dir, 'rev-parse', '--abbrev-ref', 'HEAD')
             HEADf = open(os.path.join(tmpd, 'HEAD'), 'w')
-            HEADf.write(git_stdout(repo_dir, 'rev-parse', 'HEAD'))
-            HEADf.write(' ')
-            HEADf.write(git_stdout(repo_dir, 'rev-parse', '--abbrev-ref', 'HEAD'))
+            HEADf.write(head_sha+' '+head_name)
             HEADf.close()
 
             args = []
@@ -223,6 +223,12 @@ class DiffBundler(object):
                 elif name.startswith(REFS_TAGS):
                     name = name[len(REFS_TAGS)+1:]
                     tagsf.write(sha+' '+name+'\n')
+                elif name == 'HEAD' and head_name != 'HEAD':
+                    # HEAD is not detached, so we may continue on
+                    continue
+                else:
+                    # nothing else is supported at the moment, so skip it
+                    continue
 
                 m = -1
                 for old_sha in old_shas:
@@ -234,14 +240,13 @@ class DiffBundler(object):
                         m = tm
                         if not m:
                             break
-                if m > 0:
+                if m < 0:
+                    args.append(name)
+                elif m > 0:
                     args.append(merge_base+'..'+name)
 
             headsf.close()
             tagsf.close()
-
-            if not self:
-                args = '--all'
 
             bundle = bool(args)
 
